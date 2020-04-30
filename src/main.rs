@@ -57,7 +57,12 @@ fn parse_args() -> Args<String> {
     use clap::{App, Arg};
 
     let matches = App::new("Port Sniffer")
-        .about("A lightning-fast port sniffer written in Rust that can scan all 36535 ports in a matter of seconds.")
+        .about("A lightning-fast port sniffer written in Rust that can scan all 36535 ports in a matter of seconds.\n\n\
+        The final result is saved as a csv in the format: <port>;<true|false>\\n\n\n\
+        ATTENTION: The sniffer will create an enormous amount of threads!\n\
+        ATTENTION: It's possible that you will experience internet lags!\n\
+        ATTENTION: It's possible that you lose internet connection. \
+        This should usually be a problem of you pc and not your router. Just disconnect and reconnect to your router.")
         .version(clap::crate_version!())
         .author(clap::crate_authors!())
         .arg(Arg::with_name("address")
@@ -72,7 +77,7 @@ fn parse_args() -> Args<String> {
         )
         .arg(Arg::with_name("ports")
             .help("Let's you specify the ports to sniff\n\
-            You can use patterns like: <port> <start>..<end> <start>..=<end>")
+            You can use patterns like: <port> <start>..<end> <start>..=<end>\n")
             .short("p")
             .long("ports")
             .takes_value(true)
@@ -85,7 +90,7 @@ fn parse_args() -> Args<String> {
             })
         )
         .arg(Arg::with_name("output")
-            .help("The output csv to save the open ports")
+            .help("The output csv to save the result\n[default: <address>.csv]")
             .short("o")
             .long("output")
             .takes_value(true)
