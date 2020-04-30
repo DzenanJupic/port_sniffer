@@ -9,11 +9,13 @@ use clap::Values;
 /// writes the open ports to FILE
 ///
 /// ATTENTION: creates 36_535 threads!
+/// ATTENTION:
 fn main() {
     let args = parse_args();
 
     let address = args.address;
     let ports = args.ports;
+    let total = ports.len();
     let output = args.output;
 
     let mut handles = Vec::new();
@@ -21,7 +23,7 @@ fn main() {
     let mut counter: u16 = 0;
 
     println!("Start port sniffing on {}", &address);
-    println!("Total ports: {}\n", ports.len());
+    println!("Total ports: {}\n", total);
 
     for port in ports {
         let handle = spawn(move || check_port(address, port));
@@ -31,12 +33,10 @@ fn main() {
     for (port, handle) in handles {
         let open = handle.join().expect("Something went wrong!");
 
+        open_ports.push_str(&format!("{};{}\n", port, open));
+
         if open {
             println!("Port {} is open", port);
-
-            open_ports.push_str(&port.to_string());
-            open_ports.push('\n');
-
             counter += 1;
         }
     }
@@ -44,7 +44,7 @@ fn main() {
     write(output, open_ports).expect("Could not write to file!");
 
     println!("\nFinished port sniffing");
-    println!("Found {} open port(s) of {} port(s)", counter, ports.len());
+    println!("Found {} open port(s)", counter);
 }
 
 struct Args<P: AsRef<Path>> {
@@ -159,7 +159,6 @@ fn parse_address(address: &str) -> Option<IpAddr> {
         Err(_) => {
             match lookup_host(address) {
                 Ok(ips) if ips.len() == 1 => Some(ips[0]),
-                Ok(_) => unreachable!(),
                 _ => None
             }
         }
